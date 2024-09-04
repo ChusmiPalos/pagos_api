@@ -1,6 +1,14 @@
 <?php
-// Incluimos el archivo functions.php que va a contener las funciones que intervienen en el funcionamiento de la API
-require_once 'functions.php';
+// Incluimos los archivos que intervienen en el funcionamiento de la API
+
+// Hemos compartimentado el código en la sección de verificaciones
+require_once 'verificaciones.php';
+
+// Y una vez está todo verificado, registramos el pago
+require_once 'pagos.php';
+
+// Incluimos la configuración de la bbdd
+require_once 'config.php';
 
 // Establecer los encabezados para permitir solicitudes desde cualquier origen y manejar JSON
 header("Access-Control-Allow-Origin: *");
@@ -17,46 +25,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Obtener el contenido bruto de la solicitud
+// Obtenemos el contenido bruto de la solicitud
 $input = file_get_contents("php://input");
 
-// Decodificar el JSON recibido
+// Y decodificamos el JSON recibido
 $data = json_decode($input, true);
 
 /*  Verificar si la decodificación fue exitosa
     Tomo como campos obligatorios los de "amount" y "currency", y "card_num" en pago con tarjeta, y "coin_types" en pago en metálico
 */
+
 if (
     json_last_error() == JSON_ERROR_NONE
     && verificar_data($data)
 ) {
-    echo 'Pago válido. De aquí pasamos a registrar el pago';
+    http_response_code(200);
+    echo json_encode(ingresar_pago($data));
     exit;
-    // if (!verificar_amount($data['amount'])) {
-    //     http_response_code(400); // Solicitud incorrecta
-    //     echo json_encode(["error" => "El campo 'amount' debe ser un número positivo."]);
-    //     exit;
-    // }
-    // echo json_encode(["respuesta" => 'valores_validos', "data" => $data]);
-    // exit;
 } else {
     http_response_code(400); // Solicitud incorrecta
     echo json_encode(["error" => "Datos JSON inválidos o falta algún campo obligatorio ('amount', 'currency'), en pago con tarjeta 'card_num', o bien 'coin_types' en pago en metálico."]);
     exit;
 }
-
-// Obtener el valor enviado
-$receivedValue = filter_var($data['value'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-
-// Verificar si el valor es booleano
-if (is_null($receivedValue)) {
-    http_response_code(400); // Solicitud incorrecta
-    echo json_encode(["error" => "El campo 'value' debe ser booleano (true o false)."]);
-    exit;
-}
-
-// Calcular el valor contrario
-$responseValue = !$receivedValue;
-
-// Responder con el valor contrario
-echo json_encode(["value" => $responseValue]);

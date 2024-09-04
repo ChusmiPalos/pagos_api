@@ -17,14 +17,17 @@ CREATE TABLE IF NOT EXISTS currencies (
 
 
 -- Insertar registros iniciales en la tabla 'currencies'
-INSERT INTO currencies (coin_name, exchange, coins) VALUES ('eur', 1,'1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000')
-    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange);
+INSERT INTO currencies (coin_name, exchange, coins)
+VALUES ('eur', 1,'50000,20000,10000,5000,2000,1000,500,200,100,50,20,10,5,2,1')
+    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange), coins = VALUES(coins);
 
-INSERT INTO currencies (coin_name, exchange, coins) VALUES ('usd', 0.92, '1,5,10,25,50,100,200,500,1000,2000,5000,10000')
-    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange);
+INSERT INTO currencies (coin_name, exchange, coins) 
+VALUES ('usd', 0.92, '10000,5000,2000,1000,500,200,100,50,25,10,5,1')
+    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange), coins = VALUES(coins);
 
-INSERT INTO currencies (coin_name, exchange, coins) VALUES ('gbp', 0.85,'1,5,10,25,50,100,200,500,1000,2000,5000,10000')
-    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange);
+INSERT INTO currencies (coin_name, exchange, coins) 
+VALUES ('gbp', 0.85, '10000,5000,2000,1000,500,200,100,50,25,10,5,1')
+    ON DUPLICATE KEY UPDATE exchange = VALUES(exchange), coins = VALUES(coins);
 
 
 CREATE TABLE IF NOT EXISTS registro_pagos (
@@ -32,5 +35,6 @@ CREATE TABLE IF NOT EXISTS registro_pagos (
     amount_eur INT NOT NULL,
     amount_original INT NOT NULL,
     currency_original VARCHAR(10),
-    pay_type VARCHAR(10)
+    pay_type VARCHAR(10),
+    pay_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
